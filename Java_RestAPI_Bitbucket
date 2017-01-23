@@ -3,43 +3,50 @@ package com.exadatum.bigdata;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.*;
 import org.apache.commons.httpclient.params.HttpMethodParams;
-import org.apache.http.auth.*;
-import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.commons.httpclient.util.EncodingUtil;
+import org.apache.commons.httpclient.util.HttpURLConnection;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.*;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import java.io.IOException;
+
 import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
 
 /**
  * Created by administrator on 23/1/17.
  */
 public class backup {
 
+    private static final java.lang.String JSON_STRING = "";
     private static String url = "https://bitbucket.org/users/pswapnil1/repositories";
-    public static void main(String[] args) {
+    private static String url1 = "https://bitbucket.org/users/pswapnil1/repositories";
+
+    public static void main(String[] args) throws IOException {
 
         String username = "pswapnil1";
         String password = "pswapnil1";
 
         // Create an instance of HttpClient.
         HttpClient client = new HttpClient();
-
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
-
-        credsProvider.setCredentials(
-                new AuthScope("https://bitbucket.org/account/signin/", 80),
+        credsProvider.setCredentials(new AuthScope("httpbin.org", 80),
                 new UsernamePasswordCredentials("username", "password"));
         CloseableHttpClient httpclient = HttpClients.custom()
                 .setDefaultCredentialsProvider(credsProvider)
                 .build();
+
+        StringEntity requestEntity = new StringEntity("{\"scm\":\"git\",\"project\":{\"key\": \"MYT\"}}");
 
         // Create a method instance.
         GetMethod method = new GetMethod(url);
@@ -61,16 +68,33 @@ public class backup {
             // Use caution: ensure correct character encoding and is not binary data
             System.out.println(new String(responseBody));
             HttpGet httpget = new HttpGet("https://api.bitbucket.org/2.0/repositories/pswapnil1");
+            HttpPost postMethod = new HttpPost("https://api.bitbucket.org/2.0/repositories/Rockstar11/myfirstrepo1");
+            postMethod.addHeader("content-type", "application/json");
 
+            postMethod.setEntity(requestEntity);
+
+            postMethod.addHeader(BasicScheme.authenticate(
+                    new UsernamePasswordCredentials("pswapnil1", "pswapnil1"), "UTF-8", false));
+
+            //HttpPost httpPost = new HttpPost("https://api.bitbucket.org/2.0/repositories/Myteam/myfirstrepo");
             ///repositories/{username}/{repo_slug}/pullrequests/activity
 
-            System.out.println("Executing request " + httpget.getRequestLine());
+            System.out.println("Executing Get request " + httpget.getRequestLine());
+            System.out.print("Executing Post Request "+postMethod.getRequestLine());
+
             CloseableHttpResponse response = httpclient.execute(httpget);
+            CloseableHttpResponse response1 = httpclient.execute(postMethod);
+
             try {
 
-                System.out.println("----------------------------------------");
+                System.out.println("------------Executing Get request----------------------");
                 System.out.println(response.getStatusLine());
                 System.out.println(EntityUtils.toString(response.getEntity()));
+
+                System.out.println("------------Executing Post request----------------------");
+                System.out.println(response1.getStatusLine());
+                System.out.println(EntityUtils.toString(response1.getEntity()));
+
             }finally {
                 response.close();
             }
